@@ -10,6 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
@@ -26,14 +28,20 @@ import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
 
 public class Rating extends JFrame {
- JFrame rating = new JFrame("Survey");
+ JFrame rating = new JFrame("Feedback");
  private JPanel ratingPanel=  new JPanel();
  private JSlider slider1 = new JSlider();
  private JTextField textField1 = new JTextField();
  private JTextField textField2 = new JTextField();
  private JTextArea textArea1 = new JTextArea();
+ 
  private JButton SUBMITBUTTON = new JButton("Submit");
  private JLabel rate = new JLabel();
  private JLabel label = new JLabel("FEEDBACK FORUM :");
@@ -44,10 +52,12 @@ public class Rating extends JFrame {
  Font  f2  = new Font(Font.SERIF, Font.BOLD,  20);
  Font  f3  = new Font(Font.SANS_SERIF,  Font.PLAIN, 13);
  Border  lineBorder = BorderFactory.createLineBorder(Color.BLACK);
-
+ private JButton back = new JButton("back");
  public Rating() {
 	 rating.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	 rating.setContentPane(ratingPanel);
+	 textArea1.setLineWrap(true);
+     textArea1.setWrapStyleWord(true);
 	 rating.pack();
 	 label1.setFont(f1);
 	 label2.setFont(f1);
@@ -121,6 +131,12 @@ public class Rating extends JFrame {
 	   gb.gridwidth=1;
 
 	 ratingPanel.add(SUBMITBUTTON,gb);
+	  gb.fill = GridBagConstraints.HORIZONTAL;
+	   gb.gridx = 2;
+	   gb.gridy++;
+	   gb.gridwidth=1;
+      gb.anchor = GridBagConstraints.CENTER;
+     ratingPanel.add(back,gb);
      slider1.setMinimum(0);
      slider1.setMaximum(5);
      slider1.setValue(5);
@@ -128,7 +144,15 @@ public class Rating extends JFrame {
      rate.setText(" *".repeat(slider1.getValue()));
      slider1.setPaintTicks(true);
      slider1.setPaintLabels(true);
+     rating.setLocationRelativeTo(null);
      slider1.setMajorTickSpacing(1);
+     back.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+           rating.dispose();
+           new Menu();
+         }
+     });
      SUBMITBUTTON.addActionListener(new ActionListener() {
     	 @Override
     	 public void actionPerformed(ActionEvent e) {
@@ -162,5 +186,21 @@ public class Rating extends JFrame {
     		 rate.setText(" *".repeat(slider1.getValue()));
     	 }
      });
+     int maxCharacters = 100;
+     Document doc = textArea1.getDocument();
+     ((AbstractDocument) doc).setDocumentFilter(new DocumentFilter() {
+         public void insertString(FilterBypass fb, int offs, String str, AttributeSet a) throws BadLocationException {
+             if (doc.getLength() + str.length() <= maxCharacters) {
+                 super.insertString(fb, offs, str, a);
+             }
+         }
+
+         public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet attrs) throws BadLocationException {
+             if (doc.getLength() - length + str.length() <= maxCharacters) {
+                 super.replace(fb, offset, length, str, attrs);
+             }
+         }
+     });
      }
+ 
 }
