@@ -25,11 +25,20 @@ public class Survey extends JFrame {
 
             // Set up the UI
             setTitle("Survey Questions");
-            setSize(600, 600);
+            setSize(800, 500); // Set a larger size for the frame
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            // Create a main panel with BorderLayout
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            add(mainPanel);
+
+            // Panel for holding form components
             formPanel = new JPanel();
             formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-            add(new JScrollPane(formPanel), BorderLayout.CENTER);
+
+            // Scroll pane for the form panel
+            JScrollPane scrollPane = new JScrollPane(formPanel);
+            mainPanel.add(scrollPane, BorderLayout.CENTER);
 
             loadQuestions();
 
@@ -45,7 +54,7 @@ public class Survey extends JFrame {
             // Adding the submit button at the end
             JPanel buttonPanel = new JPanel();
             buttonPanel.add(submitButton);
-            formPanel.add(buttonPanel);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
             setVisible(true);
 
@@ -66,16 +75,15 @@ public class Survey extends JFrame {
                 String questionText = resultSet.getString("question_text");
 
                 JLabel questionLabel = new JLabel(questionText);
-                JTextField answerField = new JTextField(20);
+                JTextField answerField = new JTextField();
+                answerField.setPreferredSize(new Dimension(300, 25)); // Set preferred width and height
 
-                JPanel questionPanel = new JPanel();
-                questionPanel.setLayout(new BoxLayout(questionPanel, BoxLayout.X_AXIS));
+                JPanel questionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
                 questionPanel.add(questionLabel);
-                questionPanel.add(Box.createRigidArea(new Dimension(10, 0)));
                 questionPanel.add(answerField);
 
                 formPanel.add(questionPanel);
-                formPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add some vertical spacing
+                formPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add vertical spacing
 
                 questionFields.put(questionId, answerField);
             }
@@ -86,6 +94,14 @@ public class Survey extends JFrame {
     }
 
     private void submitSurvey() {
+        // Check if any input fields are empty
+        for (JTextField textField : questionFields.values()) {
+            if (textField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields before submitting.");
+                return; // Exit method if any field is empty
+            }
+        }
+
         try {
             String insertQuery = "INSERT INTO survey_responses (survey_id, question_id, response_text) VALUES (?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(insertQuery);
@@ -113,6 +129,11 @@ public class Survey extends JFrame {
 
     public static void main(String[] args) {
         // Assuming surveyId is passed when this class is instantiated.
-        new Survey(1);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Survey(1);
+            }
+        });
     }
 }

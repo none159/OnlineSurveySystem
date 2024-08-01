@@ -15,8 +15,8 @@ public class Analytics extends JFrame {
 
     public Analytics() {
         super("Survey Analytics");
-        JPanel mainPanel = new JPanel(new GridLayout(0, 1, 0, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        JPanel mainPanel = new JPanel(new GridLayout(0, 1, 0, 50));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(100, 100, 100, 100));
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
             String query = "SELECT response_text FROM survey_responses";

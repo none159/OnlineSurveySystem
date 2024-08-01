@@ -18,17 +18,21 @@ public class Surveylist extends JFrame {
 
             // Set up the UI
             frame = new JFrame("Survey List");
-            frame.setSize(600, 400);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new BorderLayout());
+            frame.setSize(600, 400);
 
-            surveyPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+            // Panel to hold survey buttons
+            surveyPanel = new JPanel(new GridBagLayout());
             surveyPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            frame.add(new JScrollPane(surveyPanel), BorderLayout.CENTER);
 
+            // Scroll pane for the survey panel
+            JScrollPane scrollPane = new JScrollPane(surveyPanel);
+            frame.add(scrollPane, BorderLayout.CENTER);
+
+            // Load surveys from database
             loadSurveys();
 
-            // Add back button
+            // Back button setup
             JButton backButton = new JButton("Back");
             backButton.addActionListener(new ActionListener() {
                 @Override
@@ -39,6 +43,7 @@ public class Surveylist extends JFrame {
             });
             frame.add(backButton, BorderLayout.SOUTH);
 
+            // Display the frame
             frame.setVisible(true);
 
         } catch (SQLException e) {
@@ -52,6 +57,11 @@ public class Surveylist extends JFrame {
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
 
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.insets = new Insets(5, 5, 5, 5);
+
             while (resultSet.next()) {
                 int surveyId = resultSet.getInt("id");
                 String surveyTitle = resultSet.getString("title");
@@ -62,17 +72,30 @@ public class Surveylist extends JFrame {
                 surveyButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        new Survey(surveyId);
+                        new Survey(surveyId); // Open survey details
                     }
                 });
-                surveyPanel.add(surveyButton);
+
+                // Add button to the survey panel
+                surveyPanel.add(surveyButton, gbc);
+                gbc.gridy++; // Move to the next row
             }
+
+            // Update the panel layout
+            surveyPanel.revalidate();
+            surveyPanel.repaint();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
-        new Surveylist();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Surveylist();
+            }
+        });
     }
 }
